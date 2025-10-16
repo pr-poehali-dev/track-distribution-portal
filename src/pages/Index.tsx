@@ -2,10 +2,21 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
+  const [releaseStep, setReleaseStep] = useState(1);
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,8 +40,22 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm">Войти</Button>
-              <Button size="sm" className="gradient-primary border-0">Начать</Button>
+              {!isLoggedIn ? (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }}>Войти</Button>
+                  <Button size="sm" className="gradient-primary border-0" onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}>Начать</Button>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="sm">
+                    <Icon name="User" size={18} className="mr-2" />
+                    Профиль
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setIsLoggedIn(false)}>
+                    <Icon name="LogOut" size={18} />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -166,9 +191,10 @@ const Index = () => {
               <CardContent>
                 <div className="space-y-4">
                   {[
-                    { title: 'Summer Vibes', plays: 450000, earnings: 120, status: 'active' },
-                    { title: 'Night Drive', plays: 320000, earnings: 89, status: 'active' },
-                    { title: 'Ocean Waves', plays: 180000, earnings: 52, status: 'processing' }
+                    { title: 'Summer Vibes', plays: 450000, earnings: 120, status: 'active', moderation: 'approved' },
+                    { title: 'Night Drive', plays: 320000, earnings: 89, status: 'active', moderation: 'approved' },
+                    { title: 'Ocean Waves', plays: 180000, earnings: 52, status: 'processing', moderation: 'pending' },
+                    { title: 'New Track', plays: 0, earnings: 0, status: 'draft', moderation: 'review' }
                   ].map((track, i) => (
                     <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-4">
@@ -177,23 +203,79 @@ const Index = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold">{track.title}</h3>
-                          <p className="text-sm text-muted-foreground">{track.plays.toLocaleString()} прослушиваний</p>
+                          <p className="text-sm text-muted-foreground">
+                            {track.status === 'draft' ? 'Черновик' : `${track.plays.toLocaleString()} прослушиваний`}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <p className="font-semibold">{track.earnings}€</p>
-                          <p className="text-sm text-muted-foreground">роялти</p>
+                        {track.status !== 'draft' && (
+                          <div className="text-right">
+                            <p className="font-semibold">{track.earnings}€</p>
+                            <p className="text-sm text-muted-foreground">роялти</p>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-1">
+                          <Badge variant={track.status === 'active' ? 'default' : track.status === 'processing' ? 'secondary' : 'outline'}>
+                            {track.status === 'active' ? 'Активен' : track.status === 'processing' ? 'Обработка' : 'Черновик'}
+                          </Badge>
+                          <Badge variant={track.moderation === 'approved' ? 'default' : track.moderation === 'pending' ? 'secondary' : 'outline'}>
+                            {track.moderation === 'approved' && <Icon name="CheckCircle" size={12} className="mr-1" />}
+                            {track.moderation === 'pending' && <Icon name="Clock" size={12} className="mr-1" />}
+                            {track.moderation === 'review' && <Icon name="AlertCircle" size={12} className="mr-1" />}
+                            {track.moderation === 'approved' ? 'Одобрен' : track.moderation === 'pending' ? 'На модерации' : 'Требует правок'}
+                          </Badge>
                         </div>
-                        <Badge variant={track.status === 'active' ? 'default' : 'secondary'}>
-                          {track.status === 'active' ? 'Активен' : 'Обработка'}
-                        </Badge>
                       </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+            
+            {isLoggedIn && (
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle>Панель модератора</CardTitle>
+                  <CardDescription>Проверка новых релизов перед публикацией</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { artist: 'DJ Example', title: 'New Summer Hit', date: '2024-10-15', status: 'pending' },
+                      { artist: 'Artist Two', title: 'Midnight Dreams', date: '2024-10-14', status: 'pending' }
+                    ].map((release, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                            <Icon name="Music" size={32} />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{release.title}</h3>
+                            <p className="text-sm text-muted-foreground">{release.artist}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Отправлен: {release.date}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Button variant="outline" size="sm">
+                            <Icon name="Eye" size={16} className="mr-2" />
+                            Проверить
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-primary border-primary/50 hover:bg-primary/10">
+                            <Icon name="CheckCircle" size={16} className="mr-2" />
+                            Одобрить
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10">
+                            <Icon name="XCircle" size={16} className="mr-2" />
+                            Отклонить
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
@@ -242,9 +324,9 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full gradient-primary border-0" size="lg">
+                  <Button className="w-full gradient-primary border-0" size="lg" onClick={() => setReleaseDialogOpen(true)}>
                     <Icon name="Send" className="mr-2" size={20} />
-                    Отправить на дистрибуцию
+                    Продолжить к деталям релиза
                   </Button>
                 </div>
               </CardContent>
@@ -378,6 +460,304 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <Dialog open={isAuthOpen} onOpenChange={setIsAuthOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{authMode === 'login' ? 'Вход в аккаунт' : 'Регистрация'}</DialogTitle>
+            <DialogDescription>
+              {authMode === 'login' ? 'Войдите для доступа к личному кабинету' : 'Создайте аккаунт для дистрибуции музыки'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={authMode} onValueChange={(v) => setAuthMode(v as 'login' | 'register')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Вход</TabsTrigger>
+              <TabsTrigger value="register">Регистрация</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="login-email">Email</Label>
+                <Input id="login-email" type="email" placeholder="your@email.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="login-password">Пароль</Label>
+                <Input id="login-password" type="password" placeholder="••••••••" />
+              </div>
+              <Button className="w-full gradient-primary border-0" onClick={() => { setIsLoggedIn(true); setIsAuthOpen(false); }}>
+                Войти
+              </Button>
+              <p className="text-sm text-center text-muted-foreground">
+                Нет аккаунта? <button className="text-primary hover:underline" onClick={() => setAuthMode('register')}>Зарегистрироваться</button>
+              </p>
+            </TabsContent>
+            
+            <TabsContent value="register" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="reg-type">Тип аккаунта</Label>
+                <Select defaultValue="artist">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="artist">Артист</SelectItem>
+                    <SelectItem value="label">Лейбл</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-name">Имя / Название</Label>
+                <Input id="reg-name" placeholder="Ваше имя или название лейбла" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-email">Email</Label>
+                <Input id="reg-email" type="email" placeholder="your@email.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-password">Пароль</Label>
+                <Input id="reg-password" type="password" placeholder="••••••••" />
+              </div>
+              <Button className="w-full gradient-primary border-0" onClick={() => { setIsLoggedIn(true); setIsAuthOpen(false); }}>
+                Создать аккаунт
+              </Button>
+              <p className="text-sm text-center text-muted-foreground">
+                Есть аккаунт? <button className="text-primary hover:underline" onClick={() => setAuthMode('login')}>Войти</button>
+              </p>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={releaseDialogOpen} onOpenChange={setReleaseDialogOpen}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Данные релиза - Шаг {releaseStep} из 3</DialogTitle>
+            <DialogDescription>
+              {releaseStep === 1 && 'Основная информация о релизе'}
+              {releaseStep === 2 && 'Информация о треках и правообладателях'}
+              {releaseStep === 3 && 'Проверка и отправка на модерацию'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {releaseStep === 1 && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Название релиза</Label>
+                <Input placeholder="Название альбома или сингла" />
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Тип релиза</Label>
+                  <Select defaultValue="single">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Сингл</SelectItem>
+                      <SelectItem value="ep">EP</SelectItem>
+                      <SelectItem value="album">Альбом</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Жанр</Label>
+                  <Select defaultValue="electronic">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="electronic">Электроника</SelectItem>
+                      <SelectItem value="pop">Поп</SelectItem>
+                      <SelectItem value="rock">Рок</SelectItem>
+                      <SelectItem value="hiphop">Хип-хоп</SelectItem>
+                      <SelectItem value="jazz">Джаз</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Основной исполнитель</Label>
+                <Input placeholder="Имя артиста" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Дополнительные исполнители (опционально)</Label>
+                <Input placeholder="feat. Artist Name" />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Дата релиза</Label>
+                  <Input type="date" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>UPC/EAN (опционально)</Label>
+                  <Input placeholder="Штрихкод релиза" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Обложка релиза</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                  <Icon name="Image" size={32} className="mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Загрузите обложку (минимум 3000x3000 px)</p>
+                </div>
+              </div>
+
+              <Button className="w-full gradient-primary border-0" onClick={() => setReleaseStep(2)}>
+                Далее: Треки и авторские права
+                <Icon name="ArrowRight" className="ml-2" size={18} />
+              </Button>
+            </div>
+          )}
+
+          {releaseStep === 2 && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold">Трек 1</h3>
+                
+                <div className="space-y-2">
+                  <Label>Название трека</Label>
+                  <Input placeholder="Название композиции" />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>ISRC код (опционально)</Label>
+                    <Input placeholder="ISRC трека" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Explicit контент</Label>
+                    <Select defaultValue="clean">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="clean">Clean</SelectItem>
+                        <SelectItem value="explicit">Explicit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Авторы музыки</Label>
+                  <Input placeholder="Композитор, продюсер" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Авторы текста</Label>
+                  <Input placeholder="Автор текста" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Правообладатель записи (P)</Label>
+                  <Input placeholder="© 2024 Your Label" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Правообладатель композиции (C)</Label>
+                  <Input placeholder="℗ 2024 Your Publishing" />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setReleaseStep(1)}>
+                  <Icon name="ArrowLeft" className="mr-2" size={18} />
+                  Назад
+                </Button>
+                <Button className="flex-1 gradient-primary border-0" onClick={() => setReleaseStep(3)}>
+                  Далее: Проверка
+                  <Icon name="ArrowRight" className="ml-2" size={18} />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {releaseStep === 3 && (
+            <div className="space-y-6">
+              <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                <h3 className="font-semibold text-lg">Проверьте данные релиза</h3>
+                
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Название релиза:</p>
+                    <p className="font-medium">Summer Vibes EP</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Тип:</p>
+                    <p className="font-medium">EP</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Исполнитель:</p>
+                    <p className="font-medium">DJ Example</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Дата релиза:</p>
+                    <p className="font-medium">25.11.2024</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-muted-foreground text-sm mb-2">Платформы:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Spotify', 'Apple Music', 'YouTube Music', 'Deezer'].map((p) => (
+                      <Badge key={p} variant="secondary">{p}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <Icon name="Info" className="text-primary mt-0.5" size={20} />
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1">Модерация релиза</h4>
+                    <p className="text-sm text-muted-foreground">
+                      После отправки ваш релиз будет проверен модератором в течение 24-48 часов. 
+                      Вы получите уведомление о статусе модерации на email.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" className="mt-1 rounded" />
+                  <span className="text-sm">
+                    Я подтверждаю, что обладаю всеми правами на распространение этой музыки и 
+                    несу ответственность за предоставленную информацию
+                  </span>
+                </label>
+                
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" className="mt-1 rounded" />
+                  <span className="text-sm">
+                    Я ознакомлен с правилами дистрибуции и согласен с условиями обслуживания
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setReleaseStep(2)}>
+                  <Icon name="ArrowLeft" className="mr-2" size={18} />
+                  Назад
+                </Button>
+                <Button className="flex-1 gradient-primary border-0" onClick={() => { setReleaseDialogOpen(false); setReleaseStep(1); }}>
+                  <Icon name="CheckCircle" className="mr-2" size={18} />
+                  Отправить на модерацию
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
