@@ -35,8 +35,7 @@ const Index = () => {
               <button onClick={() => setActiveTab('home')} className="text-sm hover:text-primary transition-colors">Главная</button>
               <button onClick={() => setActiveTab('catalog')} className="text-sm hover:text-primary transition-colors">Каталог</button>
               <button onClick={() => setActiveTab('dashboard')} className="text-sm hover:text-primary transition-colors">Личный кабинет</button>
-              <button onClick={() => setActiveTab('upload')} className="text-sm hover:text-primary transition-colors">Загрузка</button>
-              <button onClick={() => setActiveTab('pricing')} className="text-sm hover:text-primary transition-colors">Тарифы</button>
+              <button onClick={() => setActiveTab('analytics')} className="text-sm hover:text-primary transition-colors">Аналитика</button>
               <button onClick={() => setActiveTab('support')} className="text-sm hover:text-primary transition-colors">Поддержка</button>
             </div>
 
@@ -81,14 +80,10 @@ const Index = () => {
                   <p className="text-xl text-muted-foreground mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
                     Загружайте музыку, распространяйте на всех платформах и получайте роялти
                   </p>
-                  <div className="flex gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                    <Button size="lg" className="gradient-primary border-0">
-                      <Icon name="Upload" className="mr-2" size={20} />
-                      Загрузить трек
-                    </Button>
-                    <Button size="lg" variant="outline">
-                      <Icon name="Play" className="mr-2" size={20} />
-                      Как это работает
+                  <div className="flex justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                    <Button size="lg" className="gradient-primary border-0" onClick={() => setActiveTab('upload')}>
+                      <Icon name="Plus" className="mr-2" size={20} />
+                      Добавить релиз
                     </Button>
                   </div>
                 </div>
@@ -123,33 +118,18 @@ const Index = () => {
         {activeTab === 'catalog' && (
           <div className="container mx-auto px-4 py-12 animate-fade-in">
             <h1 className="text-4xl font-bold mb-8">Каталог треков</h1>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="group hover:scale-105 transition-transform">
-                  <CardHeader>
-                    <div className="relative w-full aspect-square rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 mb-4 flex items-center justify-center">
-                      <Icon name="Music" size={64} className="text-muted-foreground" />
-                      <Button size="icon" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity gradient-primary border-0">
-                        <Icon name="Play" size={24} />
-                      </Button>
-                    </div>
-                    <CardTitle>Название трека {i}</CardTitle>
-                    <CardDescription>Исполнитель • Альбом</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Icon name="Play" size={16} />
-                        {(Math.random() * 10).toFixed(1)}M
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Icon name="Download" size={16} />
-                        {(Math.random() * 5).toFixed(1)}M
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-6">
+                <Icon name="Music" size={48} className="text-muted-foreground" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-2">Каталог пуст</h2>
+              <p className="text-muted-foreground mb-6 text-center max-w-md">
+                Здесь будут отображаться все опубликованные релизы после модерации
+              </p>
+              <Button className="gradient-primary border-0" onClick={() => setActiveTab('upload')}>
+                <Icon name="Plus" className="mr-2" size={18} />
+                Добавить первый релиз
+              </Button>
             </div>
           </div>
         )}
@@ -345,48 +325,135 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === 'pricing' && (
+        {activeTab === 'analytics' && (
           <div className="container mx-auto px-4 py-12 animate-fade-in">
-            <h1 className="text-4xl font-bold text-center mb-4">Тарифы и цены</h1>
-            <p className="text-center text-muted-foreground mb-12">Выберите план, который подходит вам</p>
+            <h1 className="text-4xl font-bold mb-8">Аналитика и отчеты</h1>
             
-            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {[
-                { name: 'Starter', price: '9.99€', tracks: '5 треков', royalty: '80%', features: ['Дистрибуция на 3 платформы', 'Базовая аналитика', 'Email поддержка'] },
-                { name: 'Pro', price: '29.99€', tracks: 'Без лимита', royalty: '90%', features: ['Дистрибуция на все платформы', 'Расширенная аналитика', 'Приоритетная поддержка', 'Кастомизация профиля'], popular: true },
-                { name: 'Label', price: '99.99€', tracks: 'Без лимита', royalty: '95%', features: ['Все возможности Pro', 'Мультиаккаунт', 'API доступ', 'Персональный менеджер'] }
-              ].map((plan, i) => (
-                <Card key={i} className={plan.popular ? 'border-primary shadow-lg shadow-primary/20' : ''}>
-                  {plan.popular && (
-                    <div className="gradient-primary text-white text-center py-2 rounded-t-lg text-sm font-medium">
-                      Популярный
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    <div className="text-4xl font-bold mt-4">{plan.price}<span className="text-lg text-muted-foreground">/мес</span></div>
-                    <CardDescription className="mt-2">{plan.tracks}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Icon name="TrendingUp" size={20} className="text-primary" />
-                      <span className="text-sm">{plan.royalty} роялти</span>
-                    </div>
-                    <div className="space-y-2">
-                      {plan.features.map((feature, j) => (
-                        <div key={j} className="flex items-center gap-2">
-                          <Icon name="Check" size={16} className="text-primary" />
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <Button className={plan.popular ? 'w-full gradient-primary border-0' : 'w-full'} variant={plan.popular ? 'default' : 'outline'}>
-                      Выбрать план
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Всего выплат</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">1,240€</div>
+                  <p className="text-sm text-primary mt-1">+18% за месяц</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">В ожидании</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">320€</div>
+                  <p className="text-sm text-muted-foreground mt-1">Выплата 15.02.2025</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Прослушиваний</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">2.8M</div>
+                  <p className="text-sm text-primary mt-1">+25% за месяц</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Активных треков</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">18</div>
+                  <p className="text-sm text-muted-foreground mt-1">На 6 платформах</p>
+                </CardContent>
+              </Card>
             </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>График прослушиваний</CardTitle>
+                  <CardDescription>Последние 30 дней</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-end justify-between gap-2">
+                    {[45, 52, 48, 61, 55, 70, 65, 72, 68, 80, 75, 85, 82, 90].map((height, i) => (
+                      <div key={i} className="flex-1 bg-gradient-to-t from-primary/80 to-primary/40 rounded-t" style={{ height: `${height}%` }}></div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-4 text-xs text-muted-foreground">
+                    <span>1 янв</span>
+                    <span>15 янв</span>
+                    <span>30 янв</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Распределение по платформам</CardTitle>
+                  <CardDescription>Доход за текущий месяц</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { platform: 'Spotify', amount: '145€', percent: 45, color: 'bg-primary' },
+                      { platform: 'Apple Music', amount: '98€', percent: 31, color: 'bg-secondary' },
+                      { platform: 'YouTube Music', amount: '52€', percent: 16, color: 'bg-primary/60' },
+                      { platform: 'Deezer', amount: '25€', percent: 8, color: 'bg-primary/40' }
+                    ].map((item, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="font-medium">{item.platform}</span>
+                          <span className="text-muted-foreground">{item.amount}</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div className={`h-full ${item.color}`} style={{ width: `${item.percent}%` }}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>История выплат</CardTitle>
+                <CardDescription>Все транзакции роялти</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { date: '15.01.2025', amount: '320€', status: 'completed', tracks: 18, streams: '450K' },
+                    { date: '15.12.2024', amount: '289€', status: 'completed', tracks: 16, streams: '412K' },
+                    { date: '15.11.2024', amount: '265€', status: 'completed', tracks: 15, streams: '380K' },
+                    { date: '15.10.2024', amount: '240€', status: 'completed', tracks: 14, streams: '345K' }
+                  ].map((payment, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Icon name="DollarSign" size={24} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{payment.amount}</p>
+                          <p className="text-sm text-muted-foreground">{payment.date} • {payment.streams} прослушиваний</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="default" className="mb-1">
+                          <Icon name="CheckCircle" size={12} className="mr-1" />
+                          Выплачено
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">{payment.tracks} треков</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -410,7 +477,7 @@ const Index = () => {
                 <CardHeader>
                   <Icon name="Mail" size={32} className="mb-2 text-primary" />
                   <CardTitle>Email поддержка</CardTitle>
-                  <CardDescription>support@prosound.com</CardDescription>
+                  <CardDescription>maks3888d@gmail.com</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full">Написать письмо</Button>
