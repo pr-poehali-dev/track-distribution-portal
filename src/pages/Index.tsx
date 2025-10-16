@@ -15,6 +15,7 @@ const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
   const [releaseStep, setReleaseStep] = useState(1);
 
@@ -27,7 +28,7 @@ const Index = () => {
               <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
                 <Icon name="Music" className="text-white" size={24} />
               </div>
-              <span className="text-2xl font-bold">MusicHub</span>
+              <span className="text-2xl font-bold">PRO SOUND</span>
             </div>
             
             <div className="hidden md:flex items-center gap-8">
@@ -47,11 +48,17 @@ const Index = () => {
                 </>
               ) : (
                 <div className="flex items-center gap-3">
+                  {isAdmin && (
+                    <Badge variant="default" className="gradient-primary border-0">
+                      <Icon name="Shield" size={14} className="mr-1" />
+                      Админ
+                    </Badge>
+                  )}
                   <Button variant="ghost" size="sm">
                     <Icon name="User" size={18} className="mr-2" />
                     Профиль
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setIsLoggedIn(false)}>
+                  <Button variant="ghost" size="sm" onClick={() => { setIsLoggedIn(false); setIsAdmin(false); }}>
                     <Icon name="LogOut" size={18} />
                   </Button>
                 </div>
@@ -233,17 +240,21 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            {isLoggedIn && (
-              <Card className="mt-8">
+            {isLoggedIn && isAdmin && (
+              <Card className="mt-8 border-primary/50">
                 <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon name="Shield" size={24} className="text-primary" />
+                    <Badge variant="default" className="gradient-primary border-0">Админ-панель</Badge>
+                  </div>
                   <CardTitle>Панель модератора</CardTitle>
                   <CardDescription>Проверка новых релизов перед публикацией</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { artist: 'DJ Example', title: 'New Summer Hit', date: '2024-10-15', status: 'pending' },
-                      { artist: 'Artist Two', title: 'Midnight Dreams', date: '2024-10-14', status: 'pending' }
+                      { artist: 'DJ Example', title: 'New Summer Hit', date: '2025-01-15', status: 'pending' },
+                      { artist: 'Artist Two', title: 'Midnight Dreams', date: '2025-01-14', status: 'pending' }
                     ].map((release, i) => (
                       <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
                         <div className="flex items-center gap-4">
@@ -399,7 +410,7 @@ const Index = () => {
                 <CardHeader>
                   <Icon name="Mail" size={32} className="mb-2 text-primary" />
                   <CardTitle>Email поддержка</CardTitle>
-                  <CardDescription>support@musichub.com</CardDescription>
+                  <CardDescription>support@prosound.com</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full">Написать письмо</Button>
@@ -436,7 +447,7 @@ const Index = () => {
                 <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
                   <Icon name="Music" className="text-white" size={16} />
                 </div>
-                <span className="font-bold">MusicHub</span>
+                <span className="font-bold">PRO SOUND</span>
               </div>
               <p className="text-sm text-muted-foreground">Платформа дистрибуции музыки нового поколения</p>
             </div>
@@ -456,7 +467,7 @@ const Index = () => {
             ))}
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2024 MusicHub. Все права защищены.
+            © 2025 PRO SOUND. Все права защищены.
           </div>
         </div>
       </footer>
