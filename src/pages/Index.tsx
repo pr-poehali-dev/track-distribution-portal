@@ -61,10 +61,16 @@ const Index = () => {
               ) : (
                 <div className="flex items-center gap-3">
                   {isAdmin && (
-                    <Badge variant="default" className="gradient-primary border-0">
-                      <Icon name="Shield" size={14} className="mr-1" />
-                      Админ
-                    </Badge>
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => window.location.href = '/admin'}>
+                        <Icon name="Shield" size={16} className="mr-2" />
+                        Админ-панель
+                      </Button>
+                      <Badge variant="default" className="gradient-primary border-0">
+                        <Icon name="Shield" size={14} className="mr-1" />
+                        Админ
+                      </Badge>
+                    </>
                   )}
                   <Button variant="ghost" size="sm">
                     <Icon name="User" size={18} className="mr-2" />

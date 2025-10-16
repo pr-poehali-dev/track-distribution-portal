@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "Get all tracks",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "tracks": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get pending tracks",
+      "method": "GET",
+      "path": "/?status=pending",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "tracks": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
