@@ -16,8 +16,21 @@ const Index = () => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
   const [releaseStep, setReleaseStep] = useState(1);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    setIsAuthOpen(false);
+    setIsNewUser(false);
+  };
+
+  const handleRegister = () => {
+    setIsLoggedIn(true);
+    setIsAuthOpen(false);
+    setIsNewUser(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,8 +157,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Всего прослушиваний</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">1.2M</div>
-                  <p className="text-sm text-primary mt-1">+15% за месяц</p>
+                  <div className="text-3xl font-bold">{isNewUser ? '0' : '1.2M'}</div>
+                  <p className="text-sm text-primary mt-1">{isNewUser ? 'Начните загружать' : '+15% за месяц'}</p>
                 </CardContent>
               </Card>
               
@@ -154,8 +167,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Заработано роялти</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">300€</div>
-                  <p className="text-sm text-primary mt-1">+22% за месяц</p>
+                  <div className="text-3xl font-bold">{isNewUser ? '0₽' : '28,500₽'}</div>
+                  <p className="text-sm text-primary mt-1">{isNewUser ? 'Скоро здесь будут выплаты' : '+22% за месяц'}</p>
                 </CardContent>
               </Card>
               
@@ -164,8 +177,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Загружено треков</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">18</div>
-                  <p className="text-sm text-muted-foreground mt-1">На 5 платформах</p>
+                  <div className="text-3xl font-bold">{isNewUser ? '0' : '18'}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{isNewUser ? 'Добавьте первый релиз' : 'На 5 платформах'}</p>
                 </CardContent>
               </Card>
             </div>
@@ -177,12 +190,12 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { title: 'Summer Vibes', plays: 450000, earnings: 120, status: 'active', moderation: 'approved' },
-                    { title: 'Night Drive', plays: 320000, earnings: 89, status: 'active', moderation: 'approved' },
-                    { title: 'Ocean Waves', plays: 180000, earnings: 52, status: 'processing', moderation: 'pending' },
+                  {(isNewUser ? [] : [
+                    { title: 'Summer Vibes', plays: 450000, earnings: 11400, status: 'active', moderation: 'approved' },
+                    { title: 'Night Drive', plays: 320000, earnings: 8460, status: 'active', moderation: 'approved' },
+                    { title: 'Ocean Waves', plays: 180000, earnings: 4940, status: 'processing', moderation: 'pending' },
                     { title: 'New Track', plays: 0, earnings: 0, status: 'draft', moderation: 'review' }
-                  ].map((track, i) => (
+                  ]).map((track, i) => (
                     <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -198,7 +211,7 @@ const Index = () => {
                       <div className="flex items-center gap-6">
                         {track.status !== 'draft' && (
                           <div className="text-right">
-                            <p className="font-semibold">{track.earnings}€</p>
+                            <p className="font-semibold">{track.earnings}₽</p>
                             <p className="text-sm text-muted-foreground">роялти</p>
                           </div>
                         )}
@@ -335,8 +348,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Всего выплат</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">1,240€</div>
-                  <p className="text-sm text-primary mt-1">+18% за месяц</p>
+                  <div className="text-3xl font-bold">{isNewUser ? '0₽' : '117,800₽'}</div>
+                  <p className="text-sm text-primary mt-1">{isNewUser ? 'Здесь будет история' : '+18% за месяц'}</p>
                 </CardContent>
               </Card>
               
@@ -345,7 +358,7 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">В ожидании</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">320€</div>
+                  <div className="text-3xl font-bold">{isNewUser ? '0₽' : '30,400₽'}</div>
                   <p className="text-sm text-muted-foreground mt-1">Выплата 15.02.2025</p>
                 </CardContent>
               </Card>
@@ -355,8 +368,8 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Прослушиваний</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">2.8M</div>
-                  <p className="text-sm text-primary mt-1">+25% за месяц</p>
+                  <div className="text-3xl font-bold">{isNewUser ? '0' : '2.8M'}</div>
+                  <p className="text-sm text-primary mt-1">{isNewUser ? 'Статистика появится' : '+25% за месяц'}</p>
                 </CardContent>
               </Card>
               
@@ -365,7 +378,7 @@ const Index = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Активных треков</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">18</div>
+                  <div className="text-3xl font-bold">{isNewUser ? '0' : '18'}</div>
                   <p className="text-sm text-muted-foreground mt-1">На 6 платформах</p>
                 </CardContent>
               </Card>
@@ -398,12 +411,12 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {[
-                      { platform: 'Spotify', amount: '145€', percent: 45, color: 'bg-primary' },
-                      { platform: 'Apple Music', amount: '98€', percent: 31, color: 'bg-secondary' },
-                      { platform: 'YouTube Music', amount: '52€', percent: 16, color: 'bg-primary/60' },
-                      { platform: 'Deezer', amount: '25€', percent: 8, color: 'bg-primary/40' }
-                    ].map((item, i) => (
+                    {(isNewUser ? [] : [
+                      { platform: 'Spotify', amount: '13,775₽', percent: 45, color: 'bg-primary' },
+                      { platform: 'Apple Music', amount: '9,310₽', percent: 31, color: 'bg-secondary' },
+                      { platform: 'YouTube Music', amount: '4,940₽', percent: 16, color: 'bg-primary/60' },
+                      { platform: 'Deezer', amount: '2,375₽', percent: 8, color: 'bg-primary/40' }
+                    ]).map((item, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-sm mb-2">
                           <span className="font-medium">{item.platform}</span>
@@ -426,12 +439,12 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[
-                    { date: '15.01.2025', amount: '320€', status: 'completed', tracks: 18, streams: '450K' },
-                    { date: '15.12.2024', amount: '289€', status: 'completed', tracks: 16, streams: '412K' },
-                    { date: '15.11.2024', amount: '265€', status: 'completed', tracks: 15, streams: '380K' },
-                    { date: '15.10.2024', amount: '240€', status: 'completed', tracks: 14, streams: '345K' }
-                  ].map((payment, i) => (
+                  {(isNewUser ? [] : [
+                    { date: '15.01.2025', amount: '30,400₽', status: 'completed', tracks: 18, streams: '450K' },
+                    { date: '15.12.2024', amount: '27,455₽', status: 'completed', tracks: 16, streams: '412K' },
+                    { date: '15.11.2024', amount: '25,175₽', status: 'completed', tracks: 15, streams: '380K' },
+                    { date: '15.10.2024', amount: '22,800₽', status: 'completed', tracks: 14, streams: '345K' }
+                  ]).map((payment, i) => (
                     <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -563,7 +576,7 @@ const Index = () => {
                 <Label htmlFor="login-password">Пароль</Label>
                 <Input id="login-password" type="password" placeholder="••••••••" />
               </div>
-              <Button className="w-full gradient-primary border-0" onClick={() => { setIsLoggedIn(true); setIsAuthOpen(false); }}>
+              <Button className="w-full gradient-primary border-0" onClick={handleLogin}>
                 Войти
               </Button>
               <p className="text-sm text-center text-muted-foreground">
@@ -596,7 +609,7 @@ const Index = () => {
                 <Label htmlFor="reg-password">Пароль</Label>
                 <Input id="reg-password" type="password" placeholder="••••••••" />
               </div>
-              <Button className="w-full gradient-primary border-0" onClick={() => { setIsLoggedIn(true); setIsAuthOpen(false); }}>
+              <Button className="w-full gradient-primary border-0" onClick={handleRegister}>
                 Создать аккаунт
               </Button>
               <p className="text-sm text-center text-muted-foreground">
