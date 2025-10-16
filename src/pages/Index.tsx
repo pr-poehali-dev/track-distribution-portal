@@ -394,7 +394,7 @@ const Index = () => {
                 <CardDescription>Поддерживаемые форматы: WAV, FLAC, MP3 (320kbps)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer bg-slate-600 mx-0">
+                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer bg-slate-600 mx-0 px-[30px]">
                   <Icon name="Upload" size={48} className="mx-auto mb-4 text-muted-foreground" />
                   <p className="text-lg font-medium mb-2">Перетащите файл сюда</p>
                   <p className="text-sm text-muted-foreground">или нажмите для выбора</p>
