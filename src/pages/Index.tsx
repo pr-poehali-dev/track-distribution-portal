@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,21 +15,111 @@ const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
   const [releaseStep, setReleaseStep] = useState(1);
+  const [authForm, setAuthForm] = useState({ email: '', password: '', username: '', artist_name: '' });
+  const [authLoading, setAuthLoading] = useState(false);
+  const AUTH_API = 'https://functions.poehali.dev/ca51393e-6fb5-4308-a0f7-ff6e93d59ff5';
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setIsAuthOpen(false);
-    setIsNewUser(false);
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    const userId = localStorage.getItem('user_id');
+    const userRole = localStorage.getItem('user_role');
+    
+    if (token && userId) {
+      setIsLoggedIn(true);
+      setIsAdmin(userRole === 'admin');
+    }
+  }, []);
+
+  const handleLogin = async () => {
+    if (!authForm.email || !authForm.password) {
+      alert('Заполните email и пароль');
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API}?action=login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authForm.email, password: authForm.password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_id', data.user.id);
+        localStorage.setItem('user_role', data.user.role);
+        localStorage.setItem('username', data.user.username);
+        
+        setIsLoggedIn(true);
+        setIsAdmin(data.user.role === 'admin');
+        setIsAuthOpen(false);
+        setIsNewUser(false);
+        setAuthForm({ email: '', password: '', username: '', artist_name: '' });
+      } else {
+        alert(data.error || 'Ошибка входа');
+      }
+    } catch (error) {
+      alert('Ошибка соединения с сервером');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const handleRegister = () => {
-    setIsLoggedIn(true);
-    setIsAuthOpen(false);
-    setIsNewUser(true);
+  const handleRegister = async () => {
+    if (!authForm.email || !authForm.password || !authForm.username) {
+      alert('Заполните все поля');
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API}?action=register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: authForm.email,
+          password: authForm.password,
+          username: authForm.username,
+          artist_name: authForm.artist_name || authForm.username
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_id', data.user.id);
+        localStorage.setItem('user_role', data.user.role);
+        localStorage.setItem('username', data.user.username);
+        
+        setIsLoggedIn(true);
+        setIsAdmin(data.user.role === 'admin');
+        setIsAuthOpen(false);
+        setIsNewUser(true);
+        setAuthForm({ email: '', password: '', username: '', artist_name: '' });
+      } else {
+        alert(data.error || 'Ошибка регистрации');
+      }
+    } catch (error) {
+      alert('Ошибка соединения с сервером');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setIsAdmin(false);
   };
 
   return (
@@ -72,11 +162,11 @@ const Index = () => {
                       </Badge>
                     </>
                   )}
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => window.location.href = '/profile'}>
                     <Icon name="User" size={18} className="mr-2" />
                     Профиль
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { setIsLoggedIn(false); setIsAdmin(false); }}>
+                  <Button variant="ghost" size="sm" onClick={handleLogout}>
                     <Icon name="LogOut" size={18} />
                   </Button>
                 </div>
@@ -576,14 +666,26 @@ const Index = () => {
             <TabsContent value="login" className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="login-email">Email</Label>
-                <Input id="login-email" type="email" placeholder="your@email.com" />
+                <Input 
+                  id="login-email" 
+                  type="email" 
+                  placeholder="your@email.com"
+                  value={authForm.email}
+                  onChange={(e) => setAuthForm({...authForm, email: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="login-password">Пароль</Label>
-                <Input id="login-password" type="password" placeholder="••••••••" />
+                <Input 
+                  id="login-password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                />
               </div>
-              <Button className="w-full gradient-primary border-0" onClick={handleLogin}>
-                Войти
+              <Button className="w-full gradient-primary border-0" onClick={handleLogin} disabled={authLoading}>
+                {authLoading ? 'Вход...' : 'Войти'}
               </Button>
               <p className="text-sm text-center text-muted-foreground">
                 Нет аккаунта? <button className="text-primary hover:underline" onClick={() => setAuthMode('register')}>Зарегистрироваться</button>
@@ -592,31 +694,45 @@ const Index = () => {
             
             <TabsContent value="register" className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="reg-type">Тип аккаунта</Label>
-                <Select defaultValue="artist">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="artist">Артист</SelectItem>
-                    <SelectItem value="label">Лейбл</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="reg-username">Username (логин)</Label>
+                <Input 
+                  id="reg-username" 
+                  placeholder="username"
+                  value={authForm.username}
+                  onChange={(e) => setAuthForm({...authForm, username: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="reg-name">Имя / Название</Label>
-                <Input id="reg-name" placeholder="Ваше имя или название лейбла" />
+                <Label htmlFor="reg-artist-name">Имя артиста (необязательно)</Label>
+                <Input 
+                  id="reg-artist-name" 
+                  placeholder="Ваше сценическое имя"
+                  value={authForm.artist_name}
+                  onChange={(e) => setAuthForm({...authForm, artist_name: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-email">Email</Label>
-                <Input id="reg-email" type="email" placeholder="your@email.com" />
+                <Input 
+                  id="reg-email" 
+                  type="email" 
+                  placeholder="your@email.com"
+                  value={authForm.email}
+                  onChange={(e) => setAuthForm({...authForm, email: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="reg-password">Пароль</Label>
-                <Input id="reg-password" type="password" placeholder="••••••••" />
+                <Label htmlFor="reg-password">Пароль (минимум 6 символов)</Label>
+                <Input 
+                  id="reg-password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                />
               </div>
-              <Button className="w-full gradient-primary border-0" onClick={handleRegister}>
-                Создать аккаунт
+              <Button className="w-full gradient-primary border-0" onClick={handleRegister} disabled={authLoading}>
+                {authLoading ? 'Создание...' : 'Создать аккаунт'}
               </Button>
               <p className="text-sm text-center text-muted-foreground">
                 Есть аккаунт? <button className="text-primary hover:underline" onClick={() => setAuthMode('login')}>Войти</button>
