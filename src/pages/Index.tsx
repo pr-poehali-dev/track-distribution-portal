@@ -21,6 +21,11 @@ const Index = () => {
   const [releaseStep, setReleaseStep] = useState(1);
   const [authForm, setAuthForm] = useState({ email: '', password: '', username: '', artist_name: '' });
   const [authLoading, setAuthLoading] = useState(false);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [isDraggingAudio, setIsDraggingAudio] = useState(false);
   const AUTH_API = 'https://functions.poehali.dev/ca51393e-6fb5-4308-a0f7-ff6e93d59ff5';
 
   useEffect(() => {
@@ -816,9 +821,70 @@ const Index = () => {
 
               <div className="space-y-2">
                 <Label>Обложка релиза</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
-                  <Icon name="Image" size={32} className="mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Загрузите обложку (минимум 3000x3000 px)</p>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                    isDraggingCover ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDraggingCover(true); }}
+                  onDragLeave={() => setIsDraggingCover(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingCover(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                      const img = new Image();
+                      img.onload = () => {
+                        if (img.width === 3000 && img.height === 3000) {
+                          setCoverImage(file);
+                          setCoverPreview(URL.createObjectURL(file));
+                        } else {
+                          alert(`Неверный размер: ${img.width}x${img.height}. Требуется: 3000x3000 px`);
+                        }
+                      };
+                      img.src = URL.createObjectURL(file);
+                    } else {
+                      alert('Загрузите изображение (JPG, PNG)');
+                    }
+                  }}
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/jpeg,image/png';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        const img = new Image();
+                        img.onload = () => {
+                          if (img.width === 3000 && img.height === 3000) {
+                            setCoverImage(file);
+                            setCoverPreview(URL.createObjectURL(file));
+                          } else {
+                            alert(`Неверный размер: ${img.width}x${img.height}. Требуется: 3000x3000 px`);
+                          }
+                        };
+                        img.src = URL.createObjectURL(file);
+                      }
+                    };
+                    input.click();
+                  }}
+                >
+                  {coverPreview ? (
+                    <div className="relative">
+                      <img src={coverPreview} alt="Cover" className="w-48 h-48 mx-auto object-cover rounded-lg" />
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-primary">✓ Обложка загружена</p>
+                        <p className="text-xs text-muted-foreground">{coverImage?.name}</p>
+                        <p className="text-xs text-muted-foreground">3000x3000 px</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Icon name="Image" size={48} className="mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-sm font-medium mb-1">Перетащите изображение или нажмите для выбора</p>
+                      <p className="text-xs text-muted-foreground">Точный размер: 3000x3000 px</p>
+                      <p className="text-xs text-muted-foreground mt-1">Формат: JPG, PNG</p>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -877,6 +943,65 @@ const Index = () => {
                 <div className="space-y-2">
                   <Label>Правообладатель композиции (C)</Label>
                   <Input placeholder="℗ 2024 Your Publishing" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Аудиофайл трека</Label>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                      isDraggingAudio ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'
+                    }`}
+                    onDragOver={(e) => { e.preventDefault(); setIsDraggingAudio(true); }}
+                    onDragLeave={() => setIsDraggingAudio(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingAudio(false);
+                      const file = e.dataTransfer.files[0];
+                      const validFormats = ['audio/wav', 'audio/x-wav', 'audio/flac', 'audio/x-flac'];
+                      const validExtensions = ['.wav', '.flac'];
+                      const fileExt = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+                      
+                      if (validFormats.includes(file.type) || validExtensions.includes(fileExt)) {
+                        setAudioFile(file);
+                      } else {
+                        alert('Поддерживаются только форматы: WAV, FLAC');
+                      }
+                    }}
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.wav,.flac,audio/wav,audio/flac';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          const validExtensions = ['.wav', '.flac'];
+                          const fileExt = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+                          if (validExtensions.includes(fileExt)) {
+                            setAudioFile(file);
+                          } else {
+                            alert('Поддерживаются только форматы: WAV, FLAC');
+                          }
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    {audioFile ? (
+                      <div>
+                        <Icon name="Music" size={48} className="mx-auto mb-3 text-primary" />
+                        <p className="text-sm font-medium text-primary">✓ Аудио загружено</p>
+                        <p className="text-xs text-muted-foreground mt-1">{audioFile.name}</p>
+                        <p className="text-xs text-muted-foreground">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                    ) : (
+                      <>
+                        <Icon name="Upload" size={48} className="mx-auto mb-3 text-muted-foreground" />
+                        <p className="text-sm font-medium mb-1">Перетащите аудиофайл или нажмите для выбора</p>
+                        <p className="text-xs text-muted-foreground">Форматы: WAV, FLAC</p>
+                        <p className="text-xs text-muted-foreground mt-1">Максимальное качество без потерь</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
