@@ -250,7 +250,46 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Origin': '*'
             },
             'isBase64Encoded': False,
-            'body': json.dumps({'user': user_data})
+            'body': json.dumps({
+                'success': True,
+                'user': user_data
+            })
+        }
+    
+    if method == 'GET' and action == 'get_all_users':
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute('''
+            SELECT id, email, username, artist_name, bio, avatar_url, cover_url,
+                   social_instagram, social_youtube, social_spotify, social_vk,
+                   role, total_tracks, total_streams, total_earnings, created_at
+            FROM users
+            ORDER BY created_at DESC
+        ''')
+        
+        users = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        users_data = []
+        for user in users:
+            user_dict = dict(user)
+            user_dict['created_at'] = user_dict['created_at'].isoformat()
+            user_dict['total_earnings'] = float(user_dict['total_earnings'])
+            users_data.append(user_dict)
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'isBase64Encoded': False,
+            'body': json.dumps({
+                'success': True,
+                'users': users_data
+            })
         }
     
     if method == 'PUT' and action == 'profile':

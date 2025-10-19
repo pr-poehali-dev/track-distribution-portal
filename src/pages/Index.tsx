@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import AdminUsersPanel from '@/components/AdminUsersPanel';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -342,42 +343,55 @@ const Index = () => {
                     <Badge variant="default" className="gradient-primary border-0">Админ-панель</Badge>
                   </div>
                   <CardTitle>Панель модератора</CardTitle>
-                  <CardDescription>Проверка новых релизов перед публикацией</CardDescription>
+                  <CardDescription>Управление релизами и пользователями</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { artist: 'DJ Example', title: 'New Summer Hit', date: '2025-01-15', status: 'pending' },
-                      { artist: 'Artist Two', title: 'Midnight Dreams', date: '2025-01-14', status: 'pending' }
-                    ].map((release, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                            <Icon name="Music" size={32} />
+                  <Tabs defaultValue="moderation" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="moderation">Модерация релизов</TabsTrigger>
+                      <TabsTrigger value="users">Специальные</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="moderation" className="mt-6">
+                      <div className="space-y-4">
+                        {[
+                          { artist: 'DJ Example', title: 'New Summer Hit', date: '2025-01-15', status: 'pending' },
+                          { artist: 'Artist Two', title: 'Midnight Dreams', date: '2025-01-14', status: 'pending' }
+                        ].map((release, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border">
+                            <div className="flex items-center gap-4">
+                              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                <Icon name="Music" size={32} />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">{release.title}</h3>
+                                <p className="text-sm text-muted-foreground">{release.artist}</p>
+                                <p className="text-xs text-muted-foreground mt-1">Отправлен: {release.date}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Button variant="outline" size="sm">
+                                <Icon name="Eye" size={16} className="mr-2" />
+                                Проверить
+                              </Button>
+                              <Button variant="outline" size="sm" className="text-primary border-primary/50 hover:bg-primary/10">
+                                <Icon name="CheckCircle" size={16} className="mr-2" />
+                                Одобрить
+                              </Button>
+                              <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10">
+                                <Icon name="XCircle" size={16} className="mr-2" />
+                                Отклонить
+                              </Button>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-semibold">{release.title}</h3>
-                            <p className="text-sm text-muted-foreground">{release.artist}</p>
-                            <p className="text-xs text-muted-foreground mt-1">Отправлен: {release.date}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Button variant="outline" size="sm">
-                            <Icon name="Eye" size={16} className="mr-2" />
-                            Проверить
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-primary border-primary/50 hover:bg-primary/10">
-                            <Icon name="CheckCircle" size={16} className="mr-2" />
-                            Одобрить
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10">
-                            <Icon name="XCircle" size={16} className="mr-2" />
-                            Отклонить
-                          </Button>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="users" className="mt-6">
+                      <AdminUsersPanel authApi={AUTH_API} />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             )}

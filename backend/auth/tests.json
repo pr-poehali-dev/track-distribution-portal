@@ -1,24 +1,13 @@
 {
   "tests": [
     {
-      "name": "Register new user",
-      "method": "POST",
-      "path": "/?action=register",
-      "body": {
-        "email": "test@example.com",
-        "password": "password123",
-        "username": "testuser",
-        "artist_name": "Test Artist"
-      },
-      "expectedStatus": 201,
+      "name": "Get all users",
+      "method": "GET",
+      "path": "/?action=get_all_users",
+      "expectedStatus": 200,
       "expectedBody": {
         "success": true,
-        "token": "string",
-        "user": {
-          "id": "number",
-          "email": "string",
-          "username": "string"
-        }
+        "users": "array"
       },
       "bodyMatcher": "partial"
     }
