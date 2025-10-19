@@ -1,0 +1,15 @@
+{
+  "tests": [
+    {
+      "name": "Check follow status",
+      "method": "GET",
+      "path": "/?action=check&follower_id=1&following_id=2",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "is_following": "boolean"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -159,7 +159,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cur.execute('''
             SELECT id, email, username, artist_name, bio, avatar_url, cover_url,
                    social_instagram, social_youtube, social_spotify, social_vk,
-                   role, total_tracks, total_streams, total_earnings, created_at
+                   role, total_tracks, total_streams, total_earnings, created_at,
+                   about_me, interests, achievements, followers_count, following_count
             FROM users
             WHERE email = %s AND password_hash = %s
         ''' % (f"'{email}'", f"'{password_hash}'"))
@@ -219,7 +220,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cur.execute('''
             SELECT id, email, username, artist_name, bio, avatar_url, cover_url,
                    social_instagram, social_youtube, social_spotify, social_vk,
-                   role, total_tracks, total_streams, total_earnings, created_at
+                   role, total_tracks, total_streams, total_earnings, created_at,
+                   about_me, interests, achievements, followers_count, following_count
             FROM users
             WHERE id = %s
         ''' % user_id)
@@ -263,7 +265,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cur.execute('''
             SELECT id, email, username, artist_name, bio, avatar_url, cover_url,
                    social_instagram, social_youtube, social_spotify, social_vk,
-                   role, total_tracks, total_streams, total_earnings, created_at
+                   role, total_tracks, total_streams, total_earnings, created_at,
+                   about_me, interests, achievements, followers_count, following_count
             FROM users
             ORDER BY created_at DESC
         ''')
