@@ -27,7 +27,11 @@ const Index = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isDraggingCover, setIsDraggingCover] = useState(false);
   const [isDraggingAudio, setIsDraggingAudio] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileForm, setProfileForm] = useState({ about_me: '', interests: '', achievements: '', social_instagram: '', social_youtube: '', social_spotify: '', social_vk: '' });
   const AUTH_API = 'https://functions.poehali.dev/ca51393e-6fb5-4308-a0f7-ff6e93d59ff5';
+  const FOLLOW_API = 'https://functions.poehali.dev/ba34d9b1-61b5-4abf-9a16-b4e979fbd40b';
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -37,8 +41,64 @@ const Index = () => {
     if (token && userId) {
       setIsLoggedIn(true);
       setIsAdmin(userRole === 'admin');
+      loadCurrentUserProfile(userId);
     }
   }, []);
+
+  const loadCurrentUserProfile = async (userId: string) => {
+    setProfileLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API}?action=profile&user_id=${userId}`);
+      const data = await response.json();
+      if (data.success) {
+        setCurrentUser(data.user);
+        setProfileForm({
+          about_me: data.user.about_me || '',
+          interests: data.user.interests || '',
+          achievements: data.user.achievements || '',
+          social_instagram: data.user.social_instagram || '',
+          social_youtube: data.user.social_youtube || '',
+          social_spotify: data.user.social_spotify || '',
+          social_vk: data.user.social_vk || ''
+        });
+      }
+    } catch (err) {
+      console.error('Load profile error:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+
+    setProfileLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API}?action=profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: parseInt(userId),
+          ...profileForm
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Профиль успешно обновлён!');
+        await loadCurrentUserProfile(userId);
+      } else {
+        alert(data.message || 'Ошибка обновления профиля');
+      }
+    } catch (err) {
+      alert('Ошибка подключения к серверу');
+      console.error('Update profile error:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!authForm.email || !authForm.password) {
@@ -144,6 +204,9 @@ const Index = () => {
               <button onClick={() => setActiveTab('home')} className="text-sm hover:text-primary transition-colors">Главная</button>
               <button onClick={() => setActiveTab('catalog')} className="text-sm hover:text-primary transition-colors">Каталог</button>
               <button onClick={() => setActiveTab('dashboard')} className="text-sm hover:text-primary transition-colors">Личный кабинет</button>
+              {isLoggedIn && (
+                <button onClick={() => setActiveTab('profile')} className="text-sm hover:text-primary transition-colors">Профиль</button>
+              )}
               <button onClick={() => setActiveTab('analytics')} className="text-sm hover:text-primary transition-colors">Аналитика</button>
               <button onClick={() => setActiveTab('support')} className="text-sm hover:text-primary transition-colors">Поддержка</button>
             </div>
@@ -630,6 +693,148 @@ const Index = () => {
                 ))}
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === 'profile' && isLoggedIn && (
+          <div className="animate-fade-in">
+            <div className="container mx-auto px-4 py-12">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold mb-2">Мой профиль</h1>
+                <p className="text-muted-foreground">
+                  Управляйте своим профилем и настройками аккаунта
+                </p>
+              </div>
+
+              {profileLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-muted-foreground">Загрузка профиля...</p>
+                  </div>
+                </div>
+              ) : currentUser ? (
+                <div className="max-w-3xl mx-auto">
+                  <UserProfileCard 
+                    user={currentUser}
+                    currentUserId={currentUser.id}
+                    showActions={false}
+                  />
+                  
+                  <Card className="mt-6 p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Icon name="Settings" size={20} className="text-primary" />
+                      Редактировать профиль
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>О себе</Label>
+                        <Textarea 
+                          placeholder="Расскажите о себе..." 
+                          value={profileForm.about_me}
+                          onChange={(e) => setProfileForm({...profileForm, about_me: e.target.value})}
+                          rows={4}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Интересы (через запятую)</Label>
+                        <Input 
+                          placeholder="Музыка, Продакшн, Звукорежиссура..."
+                          value={profileForm.interests}
+                          onChange={(e) => setProfileForm({...profileForm, interests: e.target.value})}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Например: Хип-хоп, EDM, Продакшн, Микширование
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Достижения (через запятую)</Label>
+                        <Textarea 
+                          placeholder="Ваши достижения и награды..."
+                          value={profileForm.achievements}
+                          onChange={(e) => setProfileForm({...profileForm, achievements: e.target.value})}
+                          rows={3}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Например: 1 млн прослушиваний на Spotify, Номинация на премию, Релиз на мажор лейбле
+                        </p>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Instagram</Label>
+                          <Input 
+                            placeholder="https://instagram.com/..."
+                            value={profileForm.social_instagram}
+                            onChange={(e) => setProfileForm({...profileForm, social_instagram: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>YouTube</Label>
+                          <Input 
+                            placeholder="https://youtube.com/..."
+                            value={profileForm.social_youtube}
+                            onChange={(e) => setProfileForm({...profileForm, social_youtube: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Spotify</Label>
+                          <Input 
+                            placeholder="https://open.spotify.com/..."
+                            value={profileForm.social_spotify}
+                            onChange={(e) => setProfileForm({...profileForm, social_spotify: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>VK</Label>
+                          <Input 
+                            placeholder="https://vk.com/..."
+                            value={profileForm.social_vk}
+                            onChange={(e) => setProfileForm({...profileForm, social_vk: e.target.value})}
+                          />
+                        </div>
+                      </div>
+
+                      <Button 
+                        className="w-full gradient-primary border-0"
+                        onClick={handleUpdateProfile}
+                        disabled={profileLoading}
+                      >
+                        {profileLoading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                            Сохранение...
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="Save" size={18} className="mr-2" />
+                            Сохранить изменения
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              ) : (
+                <Card className="p-8 text-center">
+                  <Icon name="AlertCircle" size={48} className="mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Не удалось загрузить профиль</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Попробуйте перезагрузить страницу
+                  </p>
+                  <Button onClick={() => window.location.reload()}>
+                    <Icon name="RefreshCw" size={16} className="mr-2" />
+                    Перезагрузить
+                  </Button>
+                </Card>
+              )}
+            </div>
           </div>
         )}
       </main>

@@ -315,6 +315,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             updates.append(f"artist_name = '{body_data['artist_name']}'")
         if 'bio' in body_data:
             updates.append(f"bio = '{body_data['bio']}'")
+        if 'about_me' in body_data:
+            updates.append(f"about_me = '{body_data['about_me']}'")
+        if 'interests' in body_data:
+            updates.append(f"interests = '{body_data['interests']}'")
+        if 'achievements' in body_data:
+            updates.append(f"achievements = '{body_data['achievements']}'")
         if 'avatar_url' in body_data:
             updates.append(f"avatar_url = '{body_data['avatar_url']}'")
         if 'cover_url' in body_data:
