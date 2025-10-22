@@ -8,12 +8,14 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import FallingLeaves from "./components/FallingLeaves";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <FallingLeaves />
       <Toaster />
       <Sonner />
       <BrowserRouter>
