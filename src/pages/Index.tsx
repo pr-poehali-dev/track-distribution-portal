@@ -501,7 +501,7 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full gradient-primary border-0" size="lg" onClick={() => setReleaseDialogOpen(true)}>
+                  <Button className="w-full gradient-primary border-0" size="lg" onClick={() => window.open('https://t9xrr5es.forms.app/bezymyannaya-forma', '_blank')}>
                     <Icon name="Send" className="mr-2" size={20} />
                     Продолжить к деталям релиза
                   </Button>
@@ -960,11 +960,11 @@ const Index = () => {
           </Tabs>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
 
-      <Dialog open={releaseDialogOpen} onOpenChange={setReleaseDialogOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Данные релиза - Шаг {releaseStep} из 3</DialogTitle>
+export default Index;
             <DialogDescription>
               {releaseStep === 1 && 'Основная информация о релизе'}
               {releaseStep === 2 && 'Информация о треках и правообладателях'}
