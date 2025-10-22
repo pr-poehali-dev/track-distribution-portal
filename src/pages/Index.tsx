@@ -18,15 +18,10 @@ const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-  const [releaseDialogOpen, setReleaseDialogOpen] = useState(false);
-  const [releaseStep, setReleaseStep] = useState(1);
+
   const [authForm, setAuthForm] = useState({ email: '', password: '', username: '', artist_name: '' });
   const [authLoading, setAuthLoading] = useState(false);
-  const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string>('');
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isDraggingCover, setIsDraggingCover] = useState(false);
-  const [isDraggingAudio, setIsDraggingAudio] = useState(false);
+
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileForm, setProfileForm] = useState({ about_me: '', interests: '', achievements: '', social_instagram: '', social_youtube: '', social_spotify: '', social_vk: '' });
@@ -259,7 +254,7 @@ const Index = () => {
                     Загружайте музыку, распространяйте на всех платформах и получайте роялти
                   </p>
                   <div className="flex justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                    <Button size="lg" className="gradient-primary border-0" onClick={() => setActiveTab('upload')}>
+                    <Button size="lg" className="gradient-primary border-0" onClick={() => window.open('https://t9xrr5es.forms.app/bezymyannaya-forma', '_blank')}>
                       <Icon name="Plus" className="mr-2" size={20} />
                       Добавить релиз
                     </Button>
